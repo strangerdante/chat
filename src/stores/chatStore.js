@@ -17,8 +17,8 @@ import {
   getDoc,
   writeBatch
 } from 'firebase/firestore'
-import { db } from '../firebase/config.js'
-import { useAuthStore } from './authStore.js'
+import { db } from '../firebase/config'
+import { useAuthStore } from './authStore'
 
 export const useChatStore = defineStore('chat', () => {
   const rooms = ref([])

@@ -50,7 +50,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useAuthStore } from '../../stores/authStore.js'
+import { useAuthStore } from '../../stores/authStore'
 import AvatarBadge from '../ui/AvatarBadge.vue'
 
 const props = defineProps({

@@ -70,7 +70,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useAuthStore } from '../../stores/authStore.js'
+import { useAuthStore } from '../../stores/authStore'
 import { useChatStore } from '../../stores/chatStore.js'
 import MessageList from './MessageList.vue'
 import MessageComposer from './MessageComposer.vue'

@@ -1,10 +1,10 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../stores/authStore.js'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { useAuthStore } from '../stores/authStore'
 import HomeView from '../views/HomeView.vue'
 import AuthView from '../views/AuthView.vue'
 import ChatView from '../views/ChatView.vue'
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
@@ -31,13 +31,13 @@ const router = createRouter({
 })
 
 // Navigation guard
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
   
   // Esperar a que termine de cargar el estado de autenticación
   if (authStore.loading) {
     // Crear una promesa que se resuelve cuando loading sea false
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       const checkAuth = () => {
         if (!authStore.loading) {
           resolve()
@@ -52,7 +52,7 @@ router.beforeEach(async (to, from, next) => {
   
   // Agregar un pequeño delay adicional para asegurar que el estado esté completamente actualizado
   if (to.meta.requiresAuth || (to.name === 'Auth' && authStore.isAuthenticated)) {
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise<void>(resolve => setTimeout(resolve, 100))
   }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
@@ -64,4 +64,4 @@ router.beforeEach(async (to, from, next) => {
   }
 })
 
-export default router
+export default router 

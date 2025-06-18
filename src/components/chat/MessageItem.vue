@@ -60,7 +60,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useAuthStore } from '../../stores/authStore.js'
+import { useAuthStore } from '../../stores/authStore'
 import { useChatStore } from '../../stores/chatStore.js'
 import AvatarBadge from '../ui/AvatarBadge.vue'
 

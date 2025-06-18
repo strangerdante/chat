@@ -338,7 +338,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/authStore.js'
+import { useAuthStore } from '../stores/authStore'
 import { useChatStore } from '../stores/chatStore.js'
 import ChatRoom from '../components/chat/ChatRoom.vue'
 import UsersList from '../components/chat/UsersList.vue'

@@ -1,26 +1,49 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, type Ref, type ComputedRef } from 'vue'
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  type User as FirebaseUser
 } from 'firebase/auth'
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { auth, db } from '../firebase/config.js'
+import { auth, db } from '../firebase/config'
 
-export const useAuthStore = defineStore('auth', () => {
-  const user = ref(null)
-  const loading = ref(true)
-  const error = ref(null)
+interface UserProfile {
+  uid: string
+  email: string | null
+  displayName?: string
+  createdAt?: any
+  isOnline?: boolean
+  lastSeen?: any
+}
+
+interface AuthStore {
+  user: Ref<UserProfile | null>
+  loading: Ref<boolean>
+  error: Ref<string | null>
+  isAuthenticated: ComputedRef<boolean>
+  userProfile: ComputedRef<UserProfile | null>
+  initializeAuthListener: () => void
+  register: (email: string, password: string, displayName: string) => Promise<boolean>
+  login: (email: string, password: string) => Promise<boolean>
+  logout: () => Promise<void>
+  clearError: () => void
+}
+
+export const useAuthStore = defineStore('auth', (): AuthStore => {
+  const user = ref<UserProfile | null>(null)
+  const loading = ref<boolean>(true)
+  const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => !!user.value)
   const userProfile = computed(() => user.value)
 
   // Initialize auth state listener
   const initializeAuthListener = () => {
-    onAuthStateChanged(auth, async (firebaseUser) => {
+    onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         try {
           // Get additional user data from Firestore
@@ -43,7 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
           user.value = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
-            displayName: firebaseUser.displayName
+            displayName: firebaseUser.displayName || undefined
           }
         }
       } else {
@@ -53,7 +76,7 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
-  const register = async (email, password, displayName) => {
+  const register = async (email: string, password: string, displayName: string): Promise<boolean> => {
     try {
       error.value = null
       
@@ -73,14 +96,14 @@ export const useAuthStore = defineStore('auth', () => {
       })
       
       return true
-    } catch (err) {
+    } catch (err: any) {
       console.error('Registration error:', err)
       error.value = getErrorMessage(err.code)
       return false
     }
   }
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       error.value = null
       loading.value = true
@@ -88,7 +111,7 @@ export const useAuthStore = defineStore('auth', () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       
       // Esperar a que el listener de onAuthStateChanged procese el usuario
-      await new Promise((resolve) => {
+      await new Promise<void>((resolve) => {
         const checkAuth = () => {
           if (user.value && user.value.uid === userCredential.user.uid) {
             resolve()
@@ -100,7 +123,7 @@ export const useAuthStore = defineStore('auth', () => {
       })
       
       return true
-    } catch (err) {
+    } catch (err: any) {
       console.error('Login error:', err)
       error.value = getErrorMessage(err.code)
       return false
@@ -109,7 +132,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
       if (user.value) {
         // Update offline status before signing out
@@ -127,7 +150,7 @@ export const useAuthStore = defineStore('auth', () => {
       await signOut(auth)
       user.value = null
       error.value = null // Clear any previous errors
-    } catch (err) {
+    } catch (err: any) {
       console.error('Logout error:', err)
       error.value = 'Error al cerrar sesión'
       // Force user to null even if there's an error
@@ -141,8 +164,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Helper function to translate Firebase error codes to Spanish
-  const getErrorMessage = (errorCode) => {
-    const errorMessages = {
+  const getErrorMessage = (errorCode: string): string => {
+    const errorMessages: Record<string, string> = {
       'auth/user-not-found': 'No existe una cuenta con este correo electrónico',
       'auth/wrong-password': 'Contraseña incorrecta',
       'auth/email-already-in-use': 'Ya existe una cuenta con este correo electrónico',
@@ -168,4 +191,4 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     clearError
   }
-})
+}) 
